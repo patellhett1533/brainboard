@@ -6,24 +6,11 @@
   --primary: #;
   --primary-hover: #;
   --secondary: #;
-  --background: #;
+  --background: #242424;
   --container: #;
   --border: #;
   --title: #;
   --text: #;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #;
-    --primary-hover: #;
-    --secondary: #;
-    --background: #;
-    --container: #;
-    --border: #;
-    --title: #;
-    --text: #;
-  }
 }
 
 * {
@@ -34,6 +21,8 @@
 
 body {
   width: 100%;
+  background-color: var(--background);
+  color: #ffffff;
 }
 
 @layer utilities {

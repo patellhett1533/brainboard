@@ -1,3 +1,4 @@
+import React from 'react'
 export default function Home() {
-  return <h1>Start Work....</h1>
+  return <h1>Brain Board</h1>
 }
