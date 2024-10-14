@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Colors } from '@/lib/constants/Color'
+import Image from 'next/image'
 
 interface Response {
   expr: string
@@ -17,6 +18,9 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [color, setColor] = React.useState<string>(Colors[0])
   const [isDrawing, setIsDrawing] = React.useState<Boolean>(false)
+  const [penSize, setPenSize] = React.useState<number>(3)
+  const [isEraser, setIsEraser] = React.useState<Boolean>(false)
+  const [eraserSize, setEraserSize] = React.useState<number>(20)
   const [result, setResult] = React.useState<GeneratedResult[]>([])
   const [dictOfVars, setDictOfVars] = React.useState<Record<string, string>>({})
 
@@ -28,7 +32,7 @@ export default function Home() {
         canvas.width = window.innerWidth
         canvas.height = window.innerHeight - canvas.offsetTop
         ctx.lineCap = 'round'
-        ctx.lineWidth = 1
+        ctx.lineWidth = penSize
       }
     }
   }, [])
@@ -57,7 +61,15 @@ export default function Home() {
     if (canvas) {
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        ctx.strokeStyle = color
+        if (isEraser) {
+          ctx.globalCompositeOperation = 'destination-out'
+          ctx.lineWidth = eraserSize
+        } else {
+          ctx.globalCompositeOperation = 'source-over'
+          ctx.strokeStyle = color
+          ctx.lineWidth = penSize
+        }
+
         ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY)
         ctx.stroke()
       }
@@ -116,8 +128,8 @@ export default function Home() {
       setResult([
         ...result,
         {
-          expression: data.data[0].expr,
-          answer: data.data[0].result,
+          expression: data.data[data.data.length - 1].expr,
+          answer: data.data[data.data.length - 1].solution,
         },
       ])
       resetCanvas()
@@ -132,6 +144,20 @@ export default function Home() {
     }
   }
 
+  const earaser = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (canvas) {
+      const ctx = canvas.getContext('2d')
+      if (ctx)
+        ctx.clearRect(
+          e.nativeEvent.offsetX - 100,
+          e.nativeEvent.offsetY - 100,
+          20,
+          20
+        )
+    }
+  }
+
   return (
     <>
       <div className="flex items-center justify-between gap-4 py-4 px-8">
@@ -142,14 +168,34 @@ export default function Home() {
           Clear
         </Button>
         <div className="z-20 flex items-center justify-center gap-4">
-          {Colors.map((color) => (
+          {Colors.map((isColor, index) => (
             <div
-              key={color}
-              className="min-w-8 min-h-8 aspect-square rounded-full cursor-pointer"
-              style={{ backgroundColor: color }}
-              onClick={() => setColor(color)}
-            />
+              key={index}
+              className={`p-1 rounded-full ${isColor === color ? 'border-2' : ''}`}
+              style={{ borderColor: isColor }}
+            >
+              <div
+                className={`min-w-8 min-h-8 aspect-square rounded-full cursor-pointer`}
+                style={{ backgroundColor: isColor }}
+                onClick={() => {
+                  setColor(isColor)
+                  setIsEraser(false)
+                }}
+              />
+            </div>
           ))}
+          <div
+            className={`min-w-8 max-w-8 min-h-8 max-w-8 aspect-square rounded-full cursor-pointer bg-white`}
+            onClick={() => setIsEraser(!isEraser)}
+          >
+            <Image
+              src="/images/eraser.svg"
+              width={24}
+              height={24}
+              alt="eraser"
+              className="w-full h-full object-contain"
+            />
+          </div>
         </div>
         <Button
           onClick={() => sendData()}
@@ -171,7 +217,8 @@ export default function Home() {
         <div>
           {result.map((item) => (
             <div key={item.expression}>
-              {item.expression} = {item.answer}
+              Q) {item.expression}
+              <div dangerouslySetInnerHTML={{ __html: item.answer }}></div>
             </div>
           ))}
         </div>
