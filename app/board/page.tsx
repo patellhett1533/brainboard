@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Colors } from '@/lib/constants/Color'
 import Image from 'next/image'
+import 'katex/dist/katex.min.css'
+import { InlineMath, BlockMath } from 'react-katex'
 
 interface Response {
   expr: string
@@ -125,13 +127,20 @@ export default function Home() {
       // const centerX = (minX + maxX) / 2
       // const centerY = (minY + maxY) / 2
 
-      setResult([
-        ...result,
-        {
-          expression: data.data[data.data.length - 1].expr,
-          answer: data.data[data.data.length - 1].solution,
-        },
-      ])
+      data.data.map((element: { expr: string; solution: string }) => {
+        setResult([
+          ...result,
+          { expression: element.expr, answer: element.solution },
+        ])
+      })
+
+      // setResult([
+      //   ...result,
+      //   {
+      //     expression: data.data[data.data.length - 1].expr,
+      //     answer: data.data[data.data.length - 1].solution,
+      //   },
+      // ])
       resetCanvas()
     }
   }
@@ -218,7 +227,9 @@ export default function Home() {
           {result.map((item) => (
             <div key={item.expression}>
               Q) {item.expression}
-              <div dangerouslySetInnerHTML={{ __html: item.answer }}></div>
+              <div>
+                Ans) <BlockMath math={item.answer}></BlockMath>
+              </div>
             </div>
           ))}
         </div>
