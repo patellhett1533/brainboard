@@ -5,6 +5,7 @@ import { Colors } from '@/lib/constants/Color'
 import Image from 'next/image'
 import 'katex/dist/katex.min.css'
 import { InlineMath, BlockMath } from 'react-katex'
+import PenTool from '../_components/PenTool'
 
 interface Response {
   expr: string
@@ -20,11 +21,12 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [color, setColor] = React.useState<string>(Colors[0])
   const [isDrawing, setIsDrawing] = React.useState<Boolean>(false)
-  const [penSize, setPenSize] = React.useState<number>(3)
+  const [penSize, setPenSize] = React.useState<number>(5)
   const [isEraser, setIsEraser] = React.useState<Boolean>(false)
   const [eraserSize, setEraserSize] = React.useState<number>(20)
   const [result, setResult] = React.useState<GeneratedResult[]>([])
   const [dictOfVars, setDictOfVars] = React.useState<Record<string, string>>({})
+  const [scale, setScale] = React.useState(1)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -105,42 +107,12 @@ export default function Home() {
           })
       })
 
-      // const ctx = canvas.getContext('2d')
-      // const imageData = ctx!.getImageData(0, 0, canvas.width, canvas.height)
-      // let minX = canvas.width,
-      //   minY = canvas.height,
-      //   maxX = 0,
-      //   maxY = 0
-
-      // for (let y = 0; y < canvas.height; y++) {
-      //   for (let x = 0; x < canvas.width; x++) {
-      //     const index = (y * canvas.width + x) * 4
-      //     if (imageData.data[index + 3] > 0) {
-      //       if (x < minX) minX = x
-      //       if (x > maxX) maxX = x
-      //       if (y < minY) minY = y
-      //       if (y > maxY) maxY = y
-      //     }
-      //   }
-      // }
-
-      // const centerX = (minX + maxX) / 2
-      // const centerY = (minY + maxY) / 2
-
       data.data.map((element: { expr: string; solution: string }) => {
         setResult([
           ...result,
           { expression: element.expr, answer: element.solution },
         ])
       })
-
-      // setResult([
-      //   ...result,
-      //   {
-      //     expression: data.data[data.data.length - 1].expr,
-      //     answer: data.data[data.data.length - 1].solution,
-      //   },
-      // ])
       resetCanvas()
     }
   }
@@ -153,19 +125,22 @@ export default function Home() {
     }
   }
 
-  const earaser = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (canvas) {
-      const ctx = canvas.getContext('2d')
-      if (ctx)
-        ctx.clearRect(
-          e.nativeEvent.offsetX - 100,
-          e.nativeEvent.offsetY - 100,
-          20,
-          20
-        )
-    }
-  }
+  // const handleZoom = (zoomFactor: number) => {
+  //   console.log('===')
+  //   const newScale = scale * zoomFactor
+  //   setScale(newScale)
+
+  //   const canvas = canvasRef.current
+  //   const ctx = canvas?.getContext('2d')
+
+  //   if (canvas && ctx) {
+  //     ctx.clearRect(0, 0, canvas.width, canvas.height)
+  //     ctx.setTransform(newScale, 0, 0, newScale, 0, 0)
+
+  //     ctx.fillStyle = color
+  //     ctx.fillRect(10, 10, 200, 100)
+  //   }
+  // }
 
   return (
     <>
@@ -176,36 +151,14 @@ export default function Home() {
         >
           Clear
         </Button>
-        <div className="z-20 flex items-center justify-center gap-4">
-          {Colors.map((isColor, index) => (
-            <div
-              key={index}
-              className={`p-1 rounded-full ${isColor === color ? 'border-2' : ''}`}
-              style={{ borderColor: isColor }}
-            >
-              <div
-                className={`min-w-8 min-h-8 aspect-square rounded-full cursor-pointer`}
-                style={{ backgroundColor: isColor }}
-                onClick={() => {
-                  setColor(isColor)
-                  setIsEraser(false)
-                }}
-              />
-            </div>
-          ))}
-          <div
-            className={`min-w-8 max-w-8 min-h-8 max-w-8 aspect-square rounded-full cursor-pointer bg-white`}
-            onClick={() => setIsEraser(!isEraser)}
-          >
-            <Image
-              src="/images/eraser.svg"
-              width={24}
-              height={24}
-              alt="eraser"
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
+        <PenTool
+          color={color}
+          isEraser={isEraser}
+          penSize={penSize}
+          setColor={setColor}
+          setIsEraser={setIsEraser}
+          setPenSize={setPenSize}
+        />
         <Button
           onClick={() => sendData()}
           className="rounded-lg select-none z-20 w-fit"
@@ -234,6 +187,10 @@ export default function Home() {
           ))}
         </div>
       )}
+      {/* <div className="relative mt-5 z-20 flex items-center gap-4">
+        <button onClick={() => handleZoom(1.1)}>Zoom In</button>
+        <button onClick={() => handleZoom(0.9)}>Zoom Out</button>
+      </div> */}
     </>
   )
 }

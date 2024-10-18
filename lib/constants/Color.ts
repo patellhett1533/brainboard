@@ -1,5 +1,5 @@
 const Colors = [
-  '#FAF9F6', // white,
+  '#FFFFFF', // white,
   '#ee3333', // red,
   '#e64980', // pink,
   '#be4bdb', // purple,
