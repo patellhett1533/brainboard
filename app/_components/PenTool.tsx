@@ -53,7 +53,10 @@ const PenTool = (props: Props) => {
       <div className="flex items-center justify-center gap-4">
         <div
           className={`min-w-8 max-w-8 min-h-8 max-w-8 aspect-square rounded-full cursor-pointer bg-white flex items-end justify-center z-20`}
-          onClick={() => setIsPenActive(!isPenActive)}
+          onClick={() => {
+            setIsPenActive(!isPenActive)
+            props.setColor(props.color)
+          }}
         >
           <Image
             src="/images/pencil.svg"

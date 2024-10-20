@@ -181,8 +181,8 @@ export default function Home() {
         <div>
           {result.map((item) => (
             <div key={item.expression}>
-              Q) {item.expression}
-              <div>
+              Q) <InlineMath math={item.expression}></InlineMath>
+              <div className="overflow-x-wrap">
                 Ans) <BlockMath math={item.answer}></BlockMath>
               </div>
             </div>
