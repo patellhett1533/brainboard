@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Colors } from '@/lib/constants/Color'
 import Image from 'next/image'
 
@@ -6,18 +6,47 @@ type Props = {
   color: string
   isEraser: Boolean
   penSize: number
+  eraserSize: number
   setColor: (color: string) => void
   setIsEraser: (isEraser: Boolean) => void
   setPenSize: (penSize: number) => void
+  setEraserSize: (eraserSize: number) => void
 }
 
 const PenTool = (props: Props) => {
   const [isPenActive, setIsPenActive] = React.useState(false)
+  const [isEraserActive, setIsEraserActive] = React.useState(false)
+  const penRef = React.useRef<HTMLDivElement>(null)
+  const eraserRef = React.useRef<HTMLDivElement>(null)
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSize = parseInt(e.target.value, 10)
     props.setPenSize(newSize)
   }
+
+  const handleEraserSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSize = parseInt(e.target.value, 10)
+    props.setEraserSize(newSize)
+  }
+
+  const handlePenClickOutside = (event: any) => {
+    if (penRef.current && !penRef.current.contains(event.target))
+      setIsPenActive(false)
+  }
+
+  const handleEraserClickOutside = (event: any) => {
+    if (eraserRef.current && !eraserRef.current.contains(event.target))
+      setIsEraserActive(false)
+  }
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handlePenClickOutside)
+    document.addEventListener('mousedown', handleEraserClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handlePenClickOutside)
+      document.removeEventListener('mousedown', handleEraserClickOutside)
+    }
+  }, [])
 
   return (
     <div className="relative">
@@ -36,7 +65,10 @@ const PenTool = (props: Props) => {
         </div>
         <div
           className={`min-w-8 max-w-8 min-h-8 max-w-8 aspect-square rounded-full cursor-pointer bg-white z-20`}
-          onClick={() => props.setIsEraser(!props.isEraser)}
+          onClick={() => {
+            props.setIsEraser(true)
+            setIsEraserActive(!isEraserActive)
+          }}
         >
           <Image
             src="/images/eraser.svg"
@@ -48,7 +80,10 @@ const PenTool = (props: Props) => {
         </div>
       </div>
       {isPenActive && (
-        <div className="absolute left-1/2 -translate-x-1/2 z-20 translate-y-5 bg-[#FAF9F6] px-8 py-4 rounded-2xl">
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-20 translate-y-5 bg-[#FAF9F6] px-8 py-4 rounded-2xl"
+          ref={penRef}
+        >
           <div className="z-20 grid grid-cols-3 gap-4 w-36">
             {Colors.map((isColor, index) => (
               <div
@@ -72,7 +107,6 @@ const PenTool = (props: Props) => {
                   onClick={() => {
                     props.setColor(isColor)
                     props.setIsEraser(false)
-                    setIsPenActive(false)
                   }}
                 />
               </div>
@@ -85,6 +119,32 @@ const PenTool = (props: Props) => {
               max="25"
               value={props.penSize}
               onChange={handleSliderChange}
+              style={{
+                WebkitAppearance: 'none',
+                width: '100%',
+                height: '5px',
+                background: '#2C2C2C',
+                borderRadius: '5px',
+                outline: 'none',
+                opacity: 0.7,
+                transition: 'opacity 0.2s',
+              }}
+            />
+          </div>
+        </div>
+      )}
+      {isEraserActive && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-20 translate-y-5 bg-[#FAF9F6] px-8 py-4 rounded-2xl w-36"
+          ref={penRef}
+        >
+          <div ref={eraserRef}>
+            <input
+              type="range"
+              min="1"
+              max="100"
+              value={props.eraserSize}
+              onChange={handleEraserSliderChange}
               style={{
                 WebkitAppearance: 'none',
                 width: '100%',

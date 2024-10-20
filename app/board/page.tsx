@@ -21,7 +21,7 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [color, setColor] = React.useState<string>(Colors[0])
   const [isDrawing, setIsDrawing] = React.useState<Boolean>(false)
-  const [penSize, setPenSize] = React.useState<number>(5)
+  const [penSize, setPenSize] = React.useState<number>(12)
   const [isEraser, setIsEraser] = React.useState<Boolean>(false)
   const [eraserSize, setEraserSize] = React.useState<number>(20)
   const [result, setResult] = React.useState<GeneratedResult[]>([])
@@ -155,9 +155,11 @@ export default function Home() {
           color={color}
           isEraser={isEraser}
           penSize={penSize}
+          eraserSize={eraserSize}
           setColor={setColor}
           setIsEraser={setIsEraser}
           setPenSize={setPenSize}
+          setEraserSize={setEraserSize}
         />
         <Button
           onClick={() => sendData()}
